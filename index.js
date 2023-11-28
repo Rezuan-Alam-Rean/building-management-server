@@ -44,6 +44,7 @@ const client = new MongoClient(process.env.DB_URI, {
 async function run() {
   try {
     const usersCollection = client.db('building-management').collection('users')
+    const roomsCollection = client.db('building-management').collection('rooms')
     // auth related api
     app.post('/jwt', async (req, res) => {
       const user = req.body
@@ -59,6 +60,14 @@ async function run() {
         })
         .send({ success: true })
     })
+
+
+        // Get all rooms
+    app.get('/rooms', async (req, res) => {
+        const result = await roomsCollection.find().toArray()
+        res.send(result)
+      })
+
 
     // Logout
     app.get('/logout', async (req, res) => {
