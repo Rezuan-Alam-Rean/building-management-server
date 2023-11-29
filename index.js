@@ -46,6 +46,7 @@ async function run() {
     const usersCollection = client.db('building-management').collection('users')
     const roomsCollection = client.db('building-management').collection('rooms')
     const bookingsCollection = client.db('building-management').collection('bookings')
+    const announcementCollection = client.db('building-management').collection('announcement')
     // auth related api
     app.post('/jwt', async (req, res) => {
       const user = req.body
@@ -91,7 +92,24 @@ async function run() {
         }
       });
       
-  
+
+      app.get('/getBookings', async (req, res) => {
+        const result = await bookingsCollection.find().toArray()
+        res.send(result)
+      })
+
+
+      // Save a room in database
+    app.post('/announcement', verifyToken, async (req, res) => {
+        const room = req.body
+        const result = await announcementCollection.insertOne(room)
+        res.send(result)
+      })
+
+      app.get('/getAnnouncement', async (req, res) => {
+        const result = await announcementCollection.find().toArray()
+        res.send(result)
+      })
 
 
     // Logout
