@@ -45,6 +45,7 @@ async function run() {
   try {
     const usersCollection = client.db('building-management').collection('users')
     const roomsCollection = client.db('building-management').collection('rooms')
+    const bookingsCollection = client.db('building-management').collection('bookings')
     // auth related api
     app.post('/jwt', async (req, res) => {
       const user = req.body
@@ -67,6 +68,30 @@ async function run() {
         const result = await roomsCollection.find().toArray()
         res.send(result)
       })
+
+      // Endpoint to handle saving booking data
+      app.post('/bookings', async (req, res) => {
+        try {
+          const bookingData = req.body;
+      
+          if (!bookingData) {
+            return res.status(400).json({ success: false, message: 'Invalid booking data' });
+          }
+      
+          const result = await bookingsCollection.insertOne(bookingData);
+      
+          if (!result || !result.ops || result.ops.length === 0) {
+            return res.status(500).json({ success: false, message: 'Error saving booking data' });
+          }
+      
+          res.status(201).json({ success: true, data: result.ops[0] });
+        } catch (error) {
+          console.error('Error:', error);
+          res.status(500).json({ success: false, message: 'Error saving booking data' });
+        }
+      });
+      
+  
 
 
     // Logout
