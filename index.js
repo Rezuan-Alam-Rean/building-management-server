@@ -99,6 +99,15 @@ async function run() {
       })
 
 
+      app.get('/getBookings/:email', verifyToken,  async (req, res) => {
+        const email = req.params.email
+        const result = await bookingsCollection
+          .findOne({ 'email': email })
+          
+        res.send(result)
+      })
+
+
       // Save a room in database
     app.post('/announcement', verifyToken, async (req, res) => {
         const room = req.body
