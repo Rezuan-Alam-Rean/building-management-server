@@ -164,19 +164,7 @@ async function run() {
       })
 
 
-    //   Update room booking status
-    // app.patch('/rooms/status/:id', async (req, res) => {
-    //     const id = req.params.id
-    //     const status = req.body.status
-    //     const query = { _id: new ObjectId(id) }
-    //     const updateDoc = {
-    //       $set: {
-    //         booked: status,
-    //       },
-    //     }
-    //     const result = await roomsCollection.updateOne(query, updateDoc)
-    //     res.send(result)
-    //   })
+    
 
       
     // Get all bookings for guest
@@ -255,10 +243,10 @@ async function run() {
     })
 
     // Send a ping to confirm a successful connection
-    await client.db('admin').command({ ping: 1 })
-    console.log(
-      'Pinged your deployment. You successfully connected to MongoDB!'
-    )
+    // await client.db('admin').command({ ping: 1 })
+    // console.log(
+    //   'Pinged your deployment. You successfully connected to MongoDB!'
+    // )
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
