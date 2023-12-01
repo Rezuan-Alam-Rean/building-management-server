@@ -12,15 +12,16 @@ const stripe = require('stripe')(process.env.PAYMENT_SECRET_KEY)
 
 
 // middleware
-const corsOptions = {
-  origin: ['http://localhost:5173', 'http://localhost:5174'],
-  credentials: true,
-  optionSuccessStatus: 200,
-}
-app.use(cors(corsOptions))
-app.use(express.json())
-app.use(cookieParser())
-app.use(morgan('dev'))
+app.use(cors({
+  origin: [
+      'http://localhost:5173',"https://b8a12-client-side-rezuan-alam-rean.vercel.app"
+  ],
+  credentials: true
+}));
+app.use(express.json());
+app.use(cookieParser());
+
+app.use(morgan('dev'));
 const verifyToken = async (req, res, next) => {
   const token = req.cookies?.token
   console.log(token)
