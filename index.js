@@ -14,7 +14,7 @@ const stripe = require('stripe')(process.env.PAYMENT_SECRET_KEY)
 // middleware
 app.use(cors({
   origin: [
-      'http://localhost:5173',"https://b8a12-client-side-rezuan-alam-rean.vercel.app"
+      'http://localhost:5173',"https://b8a12-client-side-rezuan-alam-rean.vercel.app","https://building-management-b3fe8.web.app"
   ],
   credentials: true
 }));
@@ -22,21 +22,22 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.use(morgan('dev'));
-const verifyToken = async (req, res, next) => {
-  const token = req.cookies?.token
-  console.log(token)
-  if (!token) {
-    return res.status(401).send({ message: 'unauthorized access' })
-  }
-  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
-    if (err) {
-      console.log(err)
-      return res.status(401).send({ message: 'unauthorized access' })
-    }
-    req.user = decoded
-    next()
-  })
-}
+
+// const verifyToken = async (req, res, next) => {
+//   const token = req.cookies?.token
+//   console.log(token)
+//   if (!token) {
+//     return res.status(401).send({ message: 'unauthorized access' })
+//   }
+//   jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+//     if (err) {
+//       console.log(err)
+//       return res.status(401).send({ message: 'unauthorized access' })
+//     }
+//     req.user = decoded
+//     next()
+//   })
+// }
 
 const client = new MongoClient(process.env.DB_URI, {
   serverApi: {
@@ -52,30 +53,30 @@ async function run() {
     const bookingsCollection = client.db('building-management').collection('bookings')
     const announcementCollection = client.db('building-management').collection('announcement')
     // auth related api
-    app.post('/jwt', async (req, res) => {
-      const user = req.body
-      console.log('I need a new jwt', user)
-      const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
-        expiresIn: '365d',
-      })
-      res
-        .cookie('token', token, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
-        })
-        .send({ success: true })
-    })
+    // app.post('/jwt', async (req, res) => {
+    //   const user = req.body
+    //   console.log('I need a new jwt', user)
+    //   const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
+    //     expiresIn: '365d',
+    //   })
+    //   res
+    //     .cookie('token', token, {
+    //       httpOnly: true,
+    //       secure: process.env.NODE_ENV === 'production',
+    //       sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
+    //     })
+    //     .send({ success: true })
+    // })
 
     // For hosts
-    const verifyHost = async (req, res, next) => {
-        const user = req.user
-        const query = { email: user?.email }
-        const result = await usersCollection.findOne(query)
-        if (!result || result?.role !== 'host')
-          return res.status(401).send({ message: 'unauthorized access' })
-        next()
-      }
+    // const verifyHost = async (req, res, next) => {
+    //     const user = req.user
+    //     const query = { email: user?.email }
+    //     const result = await usersCollection.findOne(query)
+    //     if (!result || result?.role !== 'host')
+    //       return res.status(401).send({ message: 'unauthorized access' })
+    //     next()
+    //   }
 
 
     // Get user role
@@ -103,7 +104,7 @@ async function run() {
           const result = await bookingsCollection.insertOne(bookingData);
       
           if (!result || !result.ops || result.ops.length === 0) {
-            return res.status(500).json({ success: false, message: 'Error saving booking data' });
+            return res.status(500).json({ success: false, message: ' saving booking data' });
           }
       
           res.status(201).json({ success: true, data: result.ops[0] });
@@ -120,7 +121,7 @@ async function run() {
       })
 
 
-      app.get('/getBookings/:email', verifyToken,  async (req, res) => {
+      app.get('/getBookings/:email',  async (req, res) => {
         const email = req.params.email
         const result = await bookingsCollection
           .findOne({ 'email': email })
@@ -130,7 +131,7 @@ async function run() {
 
 
       // Save a room in database
-    app.post('/announcement', verifyToken, async (req, res) => {
+    app.post('/announcement', async (req, res) => {
         const room = req.body
         const result = await announcementCollection.insertOne(room)
         res.send(result)
@@ -143,21 +144,21 @@ async function run() {
 
 
         // Generate client secret for stripe payment
-    app.post('/create-payment-intent', verifyToken, async (req, res) => {
-        const { rent } = req.body
-        const amount = parseInt(rent * 100)
-        if (!rent || amount < 1) return
-        const { client_secret } = await stripe.paymentIntents.create({
-          amount: amount,
-          currency: 'usd',
-          payment_method_types: ['card'],
-        })
-        res.send({ clientSecret: client_secret })
-      })
+    // app.post('/create-payment-intent', async (req, res) => {
+    //     const { rent } = req.body
+    //     const amount = parseInt(rent * 100)
+    //     if (!rent || amount < 1) return
+    //     const { client_secret } = await stripe.paymentIntents.create({
+    //       amount: amount,
+    //       currency: 'usd',
+    //       payment_method_types: ['card'],
+    //     })
+    //     res.send({ clientSecret: client_secret })
+    //   })
 
 
       // Save booking info in booking collection
-    app.post('/bookings', verifyToken, async (req, res) => {
+    app.post('/bookings', async (req, res) => {
         const booking = req.body
         const result = await bookingsCollection.insertOne(booking)
         
@@ -169,7 +170,7 @@ async function run() {
 
       
     // Get all bookings for guest
-    app.get('/bookings', verifyToken, async (req, res) => {
+    app.get('/bookings', async (req, res) => {
       const email = req.query.email
       if (!email) return res.send([])
       const query = { 'guest.email': email }
@@ -177,7 +178,7 @@ async function run() {
       res.send(result)
     })
     // Get all bookings for host
-    app.get('/bookings/host', verifyToken, verifyHost, async (req, res) => {
+    app.get('/bookings/host',  async (req, res) => {
       const email = req.query.email
       if (!email) return res.send([])
       const query = { host: email }
@@ -187,42 +188,42 @@ async function run() {
 
 
     // Logout
-    app.get('/logout', async (req, res) => {
-      try {
-        res
-          .clearCookie('token', {
-            maxAge: 0,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
-          })
-          .send({ success: true })
-        console.log('Logout successful')
-      } catch (err) {
-        res.status(500).send(err)
-      }
-    })
+    // app.get('/logout', async (req, res) => {
+    //   try {
+    //     res
+    //       .clearCookie('token', {
+    //         maxAge: 0,
+    //         secure: process.env.NODE_ENV === 'production',
+    //         sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
+    //       })
+    //       .send({ success: true })
+    //     console.log('Logout successful')
+    //   } catch (err) {
+    //     res.status(500).send(err)
+    //   }
+    // })
 
     // Get all users
-    app.get('/users', verifyToken,  async (req, res) => {
+    app.get('/users',  async (req, res) => {
         const result = await usersCollection.find().toArray()
         res.send(result)
       })
   
       // Update user role
-      app.put('/users/update/:email', verifyToken, async (req, res) => {
-        const email = req.params.email
-        const user = req.body
-        const query = { email: email }
-        const options = { upsert: true }
-        const updateDoc = {
-          $set: {
-            ...user,
-            timestamp: Date.now(),
-          },
-        }
-        const result = await usersCollection.updateOne(query, updateDoc, options)
-        res.send(result)
-      })
+      // app.put('/users/update/:email', async (req, res) => {
+      //   const email = req.params.email
+      //   const user = req.body
+      //   const query = { email: email }
+      //   const options = { upsert: true }
+      //   const updateDoc = {
+      //     $set: {
+      //       ...user,
+      //       timestamp: Date.now(),
+      //     },
+      //   }
+      //   const result = await usersCollection.updateOne(query, updateDoc, options)
+      //   res.send(result)
+      // })
 
     // Save or modify user email, status in DB
     app.put('/users/:email', async (req, res) => {
