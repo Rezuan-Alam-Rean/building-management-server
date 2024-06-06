@@ -3,7 +3,7 @@ const app = express()
 require('dotenv').config()
 const cors = require('cors')
 const cookieParser = require('cookie-parser')
-const { MongoClient, ServerApiVersion } = require('mongodb')
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb')
 const jwt = require('jsonwebtoken')
 const morgan = require('morgan')
 const port = process.env.PORT || 8000
@@ -86,11 +86,25 @@ async function run() {
         res.send(result)
       })
 
-        // Get all rooms
+         // Get all rooms from db
     app.get('/rooms', async (req, res) => {
-        const result = await roomsCollection.find().toArray()
-        res.send(result)
-      })
+      const category = req.query.category
+      console.log(category)
+      let query = {}
+      if (category && category !== 'null') query = { category }
+      const result = await roomsCollection.find(query).toArray()
+      res.send(result)
+    })
+
+
+     // Get a single room data from db using _id
+     app.get('/room/:id', async (req, res) => {
+      const id = req.params.id
+      const query = { _id: new ObjectId(id) }
+      const result = await roomsCollection.findOne(query)
+      res.send(result)
+    })
+
 
       // Endpoint to handle saving booking data
       app.post('/book', async (req, res) => {
