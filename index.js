@@ -129,10 +129,10 @@ async function run() {
       });
       
 
-      app.get('/getBookings', async (req, res) => {
-        const result = await bookingsCollection.find().toArray()
-        res.send(result)
-      })
+      // app.get('/getBookings', async (req, res) => {
+      //   const result = await bookingsCollection.find().toArray()
+      //   res.send(result)
+      // })
 
 
       app.get('/getBookings/:email',  async (req, res) => {
